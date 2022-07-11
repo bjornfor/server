@@ -50,11 +50,7 @@ class FTP extends Common {
 			$this->username = $params['user'];
 			$this->password = $params['password'];
 			if (isset($params['secure'])) {
-				if (is_string($params['secure'])) {
-					$this->secure = ($params['secure'] === 'true');
-				} else {
-					$this->secure = (bool)$params['secure'];
-				}
+				$this->secure = is_string($params['secure']) ? ($params['secure'] === 'true') : (bool) $params['secure'];
 			} else {
 				$this->secure = false;
 			}
@@ -355,10 +351,12 @@ class FTP extends Common {
 
 			$data = [];
 			$data['mimetype'] = $isDir ? FileInfo::MIMETYPE_FOLDER : $mimeTypeDetector->detectPath($name);
-			$data['mtime'] = \DateTime::createFromFormat('YmdGis', $file['modify'])->getTimestamp();
-			if ($data['mtime'] === false) {
+			$modifyDate = \DateTime::createFromFormat('YmdGis', $file['modify']);
+			if ($modifyDate === false) {
 				$data['mtime'] = time();
-			}
+			} else {
+				$data['mtime'] = $modifyDate->getTimestamp();
+ 			}
 			if ($isDir) {
 				$data['size'] = -1; //unknown
 			} elseif (isset($file['size'])) {
