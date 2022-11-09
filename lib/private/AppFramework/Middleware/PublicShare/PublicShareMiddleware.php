@@ -24,6 +24,7 @@
 namespace OC\AppFramework\Middleware\PublicShare;
 
 use OC\AppFramework\Middleware\PublicShare\Exceptions\NeedAuthenticationException;
+use OC\Security\RateLimiting\Limiter;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Middleware;
@@ -43,10 +44,14 @@ class PublicShareMiddleware extends Middleware {
 	/** @var IConfig */
 	private $config;
 
-	public function __construct(IRequest $request, ISession $session, IConfig $config) {
+	/** @var Limiter */
+	private $limiter;
+
+	public function __construct(IRequest $request, ISession $session, IConfig $config, Limiter $limiter) {
 		$this->request = $request;
 		$this->session = $session;
 		$this->config = $config;
+		$this->limiter = $limiter;
 	}
 
 	public function beforeController($controller, $methodName) {
@@ -68,6 +73,8 @@ class PublicShareMiddleware extends Middleware {
 		$controller->setToken($token);
 
 		if (!$controller->isValidToken()) {
+			$this->rateLimit($controller, $methodName);
+
 			$controller->shareNotFound();
 			throw new NotFoundException();
 		}
@@ -127,5 +134,17 @@ class PublicShareMiddleware extends Middleware {
 		}
 
 		return true;
+	}
+
+	private function rateLimit($controller, $methodName): void {
+		// as this middleware wraps all public share controller methods,
+		// we can't use @AnonRateThrottle on them but we can throttle all of them here
+		$rateLimitIdentifier = get_class($controller) . '::' . $methodName;
+		$this->limiter->registerAnonRequest(
+			$rateLimitIdentifier,
+			10,
+			120,
+			$this->request->getRemoteAddress()
+		);
 	}
 }
