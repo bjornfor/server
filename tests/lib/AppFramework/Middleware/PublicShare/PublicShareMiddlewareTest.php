@@ -25,7 +25,7 @@ namespace Test\AppFramework\Middleware\PublicShare;
 
 use OC\AppFramework\Middleware\PublicShare\Exceptions\NeedAuthenticationException;
 use OC\AppFramework\Middleware\PublicShare\PublicShareMiddleware;
-use OC\Security\RateLimiting\Limiter;
+use OC\Security\Bruteforce\Throttler;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\NotFoundResponse;
@@ -46,7 +46,7 @@ class PublicShareMiddlewareTest extends \Test\TestCase {
 	/** @var IConfig|\PHPUnit\Framework\MockObject\MockObject */
 	private $config;
 	/** @var IConfig|\PHPUnit\Framework\MockObject\MockObject */
-	private $limiter;
+	private $throttler;
 
 	/** @var PublicShareMiddleware */
 	private $middleware;
@@ -58,13 +58,13 @@ class PublicShareMiddlewareTest extends \Test\TestCase {
 		$this->request = $this->createMock(IRequest::class);
 		$this->session = $this->createMock(ISession::class);
 		$this->config = $this->createMock(IConfig::class);
-		$this->limiter = $this->createMock(Limiter::class);
+		$this->throttler = $this->createMock(Throttler::class);
 
 		$this->middleware = new PublicShareMiddleware(
 			$this->request,
 			$this->session,
 			$this->config,
-			$this->limiter
+			$this->throttler
 		);
 	}
 

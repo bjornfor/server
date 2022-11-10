@@ -24,7 +24,7 @@
 namespace OC\AppFramework\Middleware\PublicShare;
 
 use OC\AppFramework\Middleware\PublicShare\Exceptions\NeedAuthenticationException;
-use OC\Security\RateLimiting\Limiter;
+use OC\Security\Bruteforce\Throttler;
 use OCP\AppFramework\AuthPublicShareController;
 use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\AppFramework\Middleware;
@@ -35,6 +35,7 @@ use OCP\IRequest;
 use OCP\ISession;
 
 class PublicShareMiddleware extends Middleware {
+
 	/** @var IRequest */
 	private $request;
 
@@ -44,20 +45,25 @@ class PublicShareMiddleware extends Middleware {
 	/** @var IConfig */
 	private $config;
 
-	/** @var Limiter */
-	private $limiter;
+	/** @var Throttler */
+	private $throttler;
 
-	public function __construct(IRequest $request, ISession $session, IConfig $config, Limiter $limiter) {
+	public function __construct(IRequest $request, ISession $session, IConfig $config, Throttler $throttler) {
 		$this->request = $request;
 		$this->session = $session;
 		$this->config = $config;
-		$this->limiter = $limiter;
+		$this->throttler = $throttler;
 	}
 
 	public function beforeController($controller, $methodName) {
 		if (!($controller instanceof PublicShareController)) {
 			return;
 		}
+
+		$controllerClassPath = explode('\\', get_class($controller));
+		$controllerShortClass = end($controllerClassPath);
+		$bruteforceProtectionAction = $controllerShortClass . '::' . $methodName;
+		$this->throttler->sleepDelayOrThrowOnMax($this->request->getRemoteAddress(), $bruteforceProtectionAction);
 
 		if (!$this->isLinkSharingEnabled()) {
 			throw new NotFoundException('Link sharing is disabled');
@@ -73,7 +79,7 @@ class PublicShareMiddleware extends Middleware {
 		$controller->setToken($token);
 
 		if (!$controller->isValidToken()) {
-			$this->rateLimit($controller, $methodName);
+			$this->throttle($bruteforceProtectionAction, $token);
 
 			$controller->shareNotFound();
 			throw new NotFoundException();
@@ -136,15 +142,9 @@ class PublicShareMiddleware extends Middleware {
 		return true;
 	}
 
-	private function rateLimit($controller, $methodName): void {
-		// as this middleware wraps all public share controller methods,
-		// we can't use @AnonRateThrottle on them but we can throttle all of them here
-		$rateLimitIdentifier = get_class($controller) . '::' . $methodName;
-		$this->limiter->registerAnonRequest(
-			$rateLimitIdentifier,
-			10,
-			120,
-			$this->request->getRemoteAddress()
-		);
+	private function throttle($bruteforceProtectionAction, $token): void {
+		$ip = $this->request->getRemoteAddress();
+		$this->throttler->sleepDelay($ip, $bruteforceProtectionAction);
+		$this->throttler->registerAttempt($bruteforceProtectionAction, $ip, ['token' => $token]);
 	}
 }

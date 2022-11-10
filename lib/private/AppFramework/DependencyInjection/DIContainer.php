@@ -305,7 +305,7 @@ class DIContainer extends SimpleContainer implements IAppContainer {
 					$c->get(IRequest::class),
 					$c->get(ISession::class),
 					$c->get(\OCP\IConfig::class),
-					$c->get(OC\Security\RateLimiting\Limiter::class)
+					$c->get(OC\Security\Bruteforce\Throttler::class)
 				)
 			);
 			$dispatcher->registerMiddleware(
