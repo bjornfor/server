@@ -101,6 +101,7 @@ class PublicShareMiddleware extends Middleware {
 			throw new NeedAuthenticationException();
 		}
 
+		$this->throttle($bruteforceProtectionAction, $token);
 		throw new NotFoundException();
 	}
 
