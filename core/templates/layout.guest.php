@@ -34,12 +34,11 @@
 			<div class="v-align">
 				<?php if ($_['bodyid'] === 'body-login'): ?>
 					<header role="banner">
+						<h1 class="hidden-visually">
+							<?php p($theme->getName()); ?>
+						</h1>
 						<div id="header">
-							<div class="logo">
-								<h1 class="hidden-visually">
-									<?php p($theme->getName()); ?>
-								</h1>
-							</div>
+							<img class="logo" alt="<?= 'Logo'.' '.$theme->getName() ?>" src="<?= $_['logoUrl'].$theme->getLogo(); ?>">
 						</div>
 					</header>
 				<?php endif; ?>
