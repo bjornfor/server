@@ -15,3 +15,4 @@
 - [ ] Tests ([unit](https://docs.nextcloud.com/server/latest/developer_manual/app_development/tutorial.html#unit-tests), [integration](https://docs.nextcloud.com/server/latest/developer_manual/app_development/tutorial.html#integration-tests), api and/or acceptance) are included
 - [ ] Screenshots before/after for front-end changes
 - [ ] Documentation ([manuals](https://github.com/nextcloud/documentation/) or wiki) has been updated or is not required
+- [ ] [Backports requested](https://github.com/nextcloud/backportbot/#usage) where applicable (ex: critical bugfixes)
