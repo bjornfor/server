@@ -1,17 +1,17 @@
 
 * Resolves: # <!-- related github issue -->
-* Target version: master 
 
-### Summary
+## Summary
 
 
-### TODO
+## TODO
 
 - [ ] ...
 
-### Checklist
+## Checklist
 
-- [ ] Code is properly formatted
-- [ ] Sign-off message is added to all commits
-- [ ] Tests (unit, integration, api and/or acceptance) are included
-- [ ] Documentation (manuals or wiki) has been updated or is not required
+- [ ] Code is [properly formatted](https://docs.nextcloud.com/server/latest/developer_manual/digging_deeper/continuous_integration.html#linting)
+- [ ] [Sign-off message](https://github.com/src-d/guide/blob/master/developer-community/fix-DCO.md) is added to all commits
+- [ ] Tests ([unit](https://docs.nextcloud.com/server/latest/developer_manual/app_development/tutorial.html#unit-tests), [integration](https://docs.nextcloud.com/server/latest/developer_manual/app_development/tutorial.html#integration-tests), api and/or acceptance) are included
+- [ ] Screenshots before/after for front-end changes
+- [ ] Documentation ([manuals](https://github.com/nextcloud/documentation/) or wiki) has been updated or is not required
