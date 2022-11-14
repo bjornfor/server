@@ -28,6 +28,8 @@ namespace OCA\Files_Versions\Versions;
 
 use OC\Files\View;
 use OCA\Files_Sharing\SharedStorage;
+use OCA\Files_Versions\Db\Version as VersionDb;
+use OCA\Files_Versions\Db\VersionsMapper;
 use OCA\Files_Versions\Storage;
 use OCP\Files\File;
 use OCP\Files\FileInfo;
@@ -43,10 +45,16 @@ class LegacyVersionsBackend implements IVersionBackend {
 	private $rootFolder;
 	/** @var IUserManager */
 	private $userManager;
+	private VersionsMapper $versionsMapper;
 
-	public function __construct(IRootFolder $rootFolder, IUserManager $userManager) {
+	public function __construct(
+		IRootFolder $rootFolder,
+		IUserManager $userManager,
+		VersionsMapper $versionsMapper
+	) {
 		$this->rootFolder = $rootFolder;
 		$this->userManager = $userManager;
+		$this->versionsMapper = $versionsMapper;
 	}
 
 	public function useBackendForStorage(IStorage $storage): bool {
@@ -64,12 +72,18 @@ class LegacyVersionsBackend implements IVersionBackend {
 		$nodes = $userFolder->getById($file->getId());
 		$file2 = array_pop($nodes);
 		$versions = Storage::getVersions($user->getUID(), $userFolder->getRelativePath($file2->getPath()));
+		$versionsLabels = array_reduce(
+			$this->versionsMapper->findAllVersionsForFileId($file->getId()),
+			fn($carry, VersionDb $item) => $carry[$item->getTimestamp()] = $item,
+			[]
+		);
 
-		return array_map(function (array $data) use ($file, $user) {
+		return array_map(function (array $data) use ($file, $user, $versionsLabels) {
 			return new Version(
 				(int)$data['version'],
 				(int)$data['version'],
 				$data['name'],
+				$versionsLabels[(int)$data['version']]->getName(),
 				(int)$data['size'],
 				$data['mimetype'],
 				$data['path'],

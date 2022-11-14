@@ -38,6 +38,8 @@ class Version implements IVersion {
 	/** @var string */
 	private $name;
 
+	private string $label;
+
 	/** @var int */
 	private $size;
 
@@ -60,6 +62,7 @@ class Version implements IVersion {
 		int $timestamp,
 		$revisionId,
 		string $name,
+		string $label,
 		int $size,
 		string $mimetype,
 		string $path,
@@ -70,6 +73,7 @@ class Version implements IVersion {
 		$this->timestamp = $timestamp;
 		$this->revisionId = $revisionId;
 		$this->name = $name;
+		$this->label = $label;
 		$this->size = $size;
 		$this->mimetype = $mimetype;
 		$this->path = $path;
@@ -100,6 +104,10 @@ class Version implements IVersion {
 
 	public function getSourceFileName(): string {
 		return $this->name;
+	}
+
+	public function getLabel(): string {
+		return $this->label;
 	}
 
 	public function getMimeType(): string {

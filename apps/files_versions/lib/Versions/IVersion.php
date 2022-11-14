@@ -79,6 +79,14 @@ interface IVersion {
 	public function getSourceFileName(): string;
 
 	/**
+	 * Get the user created label
+	 *
+	 * @return string
+	 * @since 15.0.0
+	 */
+	public function getLabel(): string;
+
+	/**
 	 * Get the mimetype of this version
 	 *
 	 * @return string
